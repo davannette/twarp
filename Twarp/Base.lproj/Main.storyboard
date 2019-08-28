@@ -134,7 +134,6 @@
                                                             </textField>
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6cJ-L9-EOm">
                                                                 <rect key="frame" x="320" y="0.0" width="30" height="40"/>
-                                                                <state key="normal" title="Fav"/>
                                                                 <connections>
                                                                     <action selector="btnAddFav:" destination="9pv-A4-QxB" eventType="touchUpInside" id="phQ-7k-DuK"/>
                                                                 </connections>
