@@ -17,8 +17,8 @@ protocol UpdateTimeAndDay {
 
 class TwitterViewController: TWTRTimelineViewController {
     
-    let twInterface: TwitterInterface
-    let twTimer: TimerController
+    var twInterface: TwitterInterface?
+    var twTimer: TimerController?
     
     var startDate = Date()
     var lastRefresh: Date
@@ -37,23 +37,22 @@ class TwitterViewController: TWTRTimelineViewController {
     
     required init?(coder aDecoder: NSCoder) {
         
-        // twitter handler
-        twInterface = TwitterInterface(start: startDate)
-        
-        // timer handler
-        twTimer = TimerController(time: startDate)
-        
         lastRefresh = startDate
 
         super.init(coder: aDecoder)
 
-        // set delegates
-        twInterface.delegate = self
-        twTimer.delegate = self
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // create new twitter and timer handlers
+        twInterface = TwitterInterface(start: startDate)
+        twTimer = TimerController(time: startDate)
+        
+        // set delegates
+        twInterface?.delegate = self
+        twTimer?.delegate = self
         
         // set monospace font for title to keep clock updates smooth
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.font: UIFont.monospacedDigitSystemFont(ofSize: 18, weight: UIFont.Weight.bold)]
@@ -84,8 +83,10 @@ class TwitterViewController: TWTRTimelineViewController {
         
         if isMovingFromParent {
             // moving back to home screen, stop timer updates
-            twTimer.stop()
-            delegate?.UpdateUI(fromDate: twTimer.getTime())
+            twTimer?.stop()
+            if let date = twTimer?.getTime() {
+                delegate?.UpdateUI(fromDate: date)
+            }
         }
     }
     
@@ -98,24 +99,25 @@ class TwitterViewController: TWTRTimelineViewController {
     
     func refreshFeed() {
         // get current feed time and refresh the feed
-        let time = twTimer.getTime()
-        twInterface.refreshFeed(time)
-        lastRefresh = time
+        if let time = twTimer?.getTime() {
+            twInterface?.refreshFeed(time)
+            lastRefresh = time
+        }
     }
     
     @objc func doTimerAction(_ sender: UIBarButtonItem) -> () {
         switch sender.image! {
             // handle PVR buttons
             case iconSkipBack:
-                twTimer.skip(.long, dir: .back)
+                twTimer?.skip(.long, dir: .back)
             case iconLeft:
-                twTimer.skip(.short, dir: .back)
+                twTimer?.skip(.short, dir: .back)
             case iconRight:
-                twTimer.skip(.short, dir: .forward)
+                twTimer?.skip(.short, dir: .forward)
             case iconSkipForward:
-                twTimer.skip(.long, dir: .forward)
+                twTimer?.skip(.long, dir: .forward)
             case iconPlay, iconPause:
-                if (twTimer.togglePause()) {
+                if (twTimer?.togglePause() == true) {
                     sender.image = iconPlay
                 } else {
                     sender.image = iconPause
@@ -150,12 +152,14 @@ extension TwitterViewController: TimerDelegate {
         formatter.amSymbol = "am"
         formatter.pmSymbol = "pm"
         formatter.dateFormat = Settings.shared.time24hour ? "EEE dd HH:mm:ss" : "EEE dd hh:mm:ssa"
-        title = formatter.string(from: (twTimer.getTime()) as Date)
-        // check for auto refresh
-        let autoRefresh = Settings.shared.autoRefresh
-        if autoRefresh > 0 {
-            if abs(Int((twTimer.getTime().timeIntervalSince(lastRefresh)))) > autoRefresh {
-                refreshFeed()
+        if let date = twTimer?.getTime() {
+            title = formatter.string(from: date)
+            // check for auto refresh
+            let autoRefresh = Settings.shared.autoRefresh
+            if autoRefresh > 0 {
+                if abs(Int((date.timeIntervalSince(lastRefresh)))) > autoRefresh {
+                    refreshFeed()
+                }
             }
         }
     }

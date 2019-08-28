@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Fabric
+//import Fabric
 import TwitterKit
 //import Toast_Swift
 
@@ -20,7 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         // initialise Twitter Fabric api
-        Fabric.with([Twitter.self])
+//        Fabric.with([Twitter.self])
+        TWTRTwitter.sharedInstance().start(withConsumerKey: "I8b26uL0SbGyc7ekKadXqecrO", consumerSecret: "vOpgIzaCqA0wJz0mH7D99QhX4972vLyB9g8u8gUqAe1R6yWLpq")
 
         return true
     }

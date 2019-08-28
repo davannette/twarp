@@ -62,7 +62,7 @@ class TwitterInterface {
         // search for character 'a' to capture closest tweet to date time
         let params1 = ["q": "a until:\(datestr)", "count": "1"]
         var clientError : NSError?
-        let request1 = client.urlRequest(withMethod: "GET", url: statusesShowEndpoint, parameters: params1, error: &clientError)
+        let request1 = client.urlRequest(withMethod: "GET", urlString: statusesShowEndpoint, parameters: params1, error: &clientError)
         client.sendTwitterRequest(request1) { [weak self] (response, data, connectionError) -> Void in
             if (connectionError == nil) {
                 var jsonError : NSError?
