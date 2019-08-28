@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AwesomeEnum
 
 class TwarpViewController: UIViewController, UIPickerViewDataSource, UpdateTimeAndDay {
     
@@ -86,7 +87,8 @@ class TwarpViewController: UIViewController, UIPickerViewDataSource, UpdateTimeA
 
         // save to favourites button - heart icon
 //        btnFavourite.titleLabel?.font = UIFont.fontAwesome(ofSize: 30)
-        btnFavourite.setTitle("F", for: .normal) // String.fontAwesomeIcon(name: .heartO), for: .normal)
+        let heartIcon = Awesome.Solid.heart.asImage(size: 30)
+        btnFavourite.setImage(heartIcon, for: .normal) // .setTitle("F", for: .normal) // String.fontAwesomeIcon(name: .heartO), for: .normal)
         
         // favourites menu button - star icon
 //        let attributes = [NSAttributedStringKey.font: UIFont.fontAwesome(ofSize: 18)]
@@ -198,13 +200,21 @@ class TwarpViewController: UIViewController, UIPickerViewDataSource, UpdateTimeA
     }
     
     func updateTime(fromDate: Date) {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEEE"
-        let day = dateFormatter.string(from: fromDate)
+        let date = fromDate > Date() ? Date() : fromDate
+        let dayFormatter = DateFormatter()
+        let weekdayFormatter = DateFormatter()
+        dayFormatter.dateFormat = "dd"
+        weekdayFormatter.dateFormat = "EEEE"
+        let day: String
+        if dayFormatter.string(from: date) == dayFormatter.string(from: Date()) {
+            day = "Today"
+        } else {
+            day = weekdayFormatter.string(from: date)
+        }
         let ind = arrDays.firstIndex(of: day)!
         dayPicker.selectRow(ind, inComponent: 0, animated: false)
         let cal = Calendar.current
-        let minutes = cal.component(.hour, from: fromDate) * 60 + cal.component(.minute, from: fromDate)
+        let minutes = cal.component(.hour, from: date) * 60 + cal.component(.minute, from: date)
         timeSlider.value = Float(minutes)
     }
     
