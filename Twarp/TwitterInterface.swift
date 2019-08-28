@@ -16,6 +16,15 @@ protocol TwitterFeedDelegate {
     
 }
 
+struct Tweet: Codable {
+    let createdAt: Date
+    let id: Int64
+}
+
+struct Statuses: Codable {
+    let statuses: [Tweet]
+}
+
 class TwitterInterface {
     
     // delegate for feed updates
@@ -66,9 +75,14 @@ class TwitterInterface {
         client.sendTwitterRequest(request1) { [weak self] (response, data, connectionError) -> Void in
             if (connectionError == nil) {
                 var jsonError : NSError?
-                let parsedObject : Any?
+                let parsedObject : Statuses?
                 do {
-                    parsedObject = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.allowFragments)
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "EEE MMM dd HH:mm:ss ZZZ yyyy"
+                    let decoder = JSONDecoder()
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
+                    decoder.dateDecodingStrategy = .formatted(formatter)
+                    parsedObject = try decoder.decode(Statuses.self, from: data!) // try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.allowFragments)
                 } catch let error as NSError {
                     jsonError = error
                     parsedObject = nil
@@ -76,24 +90,15 @@ class TwitterInterface {
                     fatalError()
                 }
                 // parse returned json object to extract tweet id and date
-                if let json = parsedObject as? Dictionary<String, Any> {
-                    if let statuses = json["statuses"] as? Array<Any> {
-                        if let tweet = statuses[0] as? Dictionary<String, Any> {
-                            let id = tweet["id_str"]
-                            let dstr = tweet["created_at"] as? String
-                            let df = DateFormatter()
-                            df.dateFormat = "EEE MMM dd HH:mm:ss ZZZ yyyy"
-                            let dt = df.date(from: dstr!)
-                            if upper {
-                                self?.upperBound = Int64((id! as AnyObject).int64Value)
-                                self?.upperBoundDate = dt!
-                            } else {
-                                self?.lowerBound = Int64((id! as AnyObject).int64Value)
-                                self?.lowerBoundDate = dt!
-                            }
-                            self?.checkDone()
-                        }
+                if let tweet = parsedObject?.statuses[0] {
+                    if upper {
+                        self?.upperBound = tweet.id
+                        self?.upperBoundDate = tweet.createdAt
+                    } else {
+                        self?.lowerBound = tweet.id
+                        self?.lowerBoundDate = tweet.createdAt
                     }
+                    self?.checkDone()
                 } else if jsonError != nil {
                     print("Error: \(jsonError?.localizedDescription ?? "unknown")")
                 }
