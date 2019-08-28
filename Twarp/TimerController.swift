@@ -48,8 +48,10 @@ class TimerController {
         origin = time
         
         // start clock timer
-        timer = Timer.scheduledTimer(timeInterval: TimeInterval(0.2), target: self, selector: #selector(tick), userInfo: nil, repeats: true)
-
+        timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(0.2), repeats: true) { [weak self] _ in
+            // update delegate
+            self?.delegate?.timerUpdate()
+        }
     }
     
     func getTime() -> Date {
@@ -103,14 +105,12 @@ class TimerController {
             let diff = (timePaused?.timeIntervalSinceNow)! * -1
             offset -= Int(diff)
             // start new timer
-            timer = Timer.scheduledTimer(timeInterval: TimeInterval(0.2), target: self, selector: #selector(tick), userInfo: nil, repeats: true)
+            timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(0.2), repeats: true) { [weak self] _ in
+                // update delegate
+                self?.delegate?.timerUpdate()
+            }
         }
         return paused
-    }
-    
-    @objc func tick() {
-        // update delegate
-        delegate?.timerUpdate()
     }
     
 }
