@@ -77,6 +77,10 @@ class TimerController {
         }
         if dir == Direction.forward {
             offset += amt
+            let time = getTime()
+            if time > Date() {
+                offset -= Int(time.timeIntervalSinceNow)
+            }
         } else {
             offset -= amt
         }
